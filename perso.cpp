@@ -263,7 +263,7 @@ int combat(Perso &player, Perso &ennemi){
     int choix;
 
     while(player.estVivant() and ennemi.estVivant()){
-            std::cout << "Veux-tu parer ou esquiver ?"<<std::endl;
+            std::cout << "Veux-tu parer (0) ou esquiver (1) ?"<<std::endl;
             std::cin >> choix;
             ennemi.defense(player,choix);
             std::cout<<"Vie du joueur:"<<player.pointdevie()<<std::endl;
