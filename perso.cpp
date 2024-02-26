@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 /*Tirage aléatoire d'un nombre entre min et max*/
 
@@ -69,6 +71,7 @@ Perso::Perso()
 Guerrier::Guerrier()
 {
     m_vie = 100;
+    m_nom="Guerrier";
     pointeur_arme = std::make_shared<Epeeenfer>();
 }
 
@@ -76,12 +79,14 @@ Guerrier::Guerrier()
 Mage::Mage()
 {
     m_vie = 200;
+    m_nom="Mage";
     pointeur_arme = std::make_shared<Mains>();
 }
 
 Voleur::Voleur()
 {
     m_vie = 100;
+    m_nom="Voleur";
     pointeur_arme = std::make_shared<Mains>();
 }
 
@@ -97,6 +102,9 @@ void Perso::recevoirDegats(int nbDegats)
     }
 }
 
+std::string Perso::nom(){
+    return m_nom;
+}
 /*Systeme de defens avec implementation d'alea dans le cas de l'esquive*/
 void Perso::defense(Perso &cible, int i){
     if(i==0){
@@ -107,7 +115,12 @@ void Perso::defense(Perso &cible, int i){
     }
     if(i==1){
         std::cout<<"Tentative d'esquive"<<std::endl;
+        std::cout<<""<<std::endl;
+        std::cout<<"Esquive en cours ..."<<std::endl;
+        std::cout<<""<<std::endl;
         int j= nombrealea(1,3);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
         if(j==1){
             std::cout<<"Esquive ratée"<<std::endl;
             cible.recevoirDegats(pointeur_arme->degat());
@@ -128,10 +141,6 @@ void Perso::boirePotionDeVie(int quantitePotion)
 {
     m_vie += quantitePotion;
 
-    if (m_vie > 100) //Interdiction de dépasser 100 de vie
-    {
-        m_vie = 100;
-    }
 }
 
 
@@ -155,8 +164,9 @@ int Perso::pointdevie()
 
 
 void Perso::changerarme(int i){
-    if(true){
-        std::shared_ptr<Arme> temp;
+    
+    
+    std::shared_ptr<Arme> temp;
     temp = pointeur_arme;
 
     pointeur_arme = inventaire[i];
@@ -167,14 +177,12 @@ void Perso::changerarme(int i){
     else{
         inventaire.erase(inventaire.begin()+i);
     }
-    }
-    else{
-        std::cout<<"Tu ne possède rien dans cette case de ton inventaire"<<std::endl;
-    }
+
     
     
 
 }
+
 
 void Perso::ajoutinventaire(std::string nomNouvelleArme){
 
@@ -270,10 +278,11 @@ int combat(Perso &player, Perso &ennemi){
             std::cout << "Attaque en cours ..."<<std::endl;
             player.defense(ennemi,nombrealea(0,1));
             std::cout<<"Vie de l'ennemi:"<<ennemi.pointdevie()<<std::endl;
-            
+            /*Il faut vérifier constamment si l'arme des combattants n'est pas brisée*/
             if(player.ptr_arme()->broken()){
                 if(player.stock()!=0){
                     int k;
+                    std::cout<<"Ton arme est brisée, tu dois en changer"<<std::endl;
                     player.voirinventaire();
                     std::cout << "Quelle arme souhaites-tu ?"<<std::endl;
                     std::cin>>k;
@@ -288,6 +297,7 @@ int combat(Perso &player, Perso &ennemi){
             if(ennemi.ptr_arme()->broken()){
 
                 if(ennemi.stock()!=0){
+                    /*Si l'ennemi a du stuff dans son inventaire il récupére une arme au hasard dans celui ci*/
                     int k=nombrealea(0,player.stock()-1);
                     ennemi.changerarme(k);
                 }
@@ -304,6 +314,9 @@ if (player.estVivant()){
     std::cout<<"Tu as gagné le combat et tu peux maintenant dechiffrer un peu plus du Parchemin"<<std::endl;
     player.reveal();
     ennemi.loot(player);
+    std::cout<<""<<std::endl;
+    std::cout<<"En remerciement de ta glorieuse victoire sur le mal des villageois ont choisis de t'offrir de la soupe aux oignons : tu gagnes 50 points de vie"<<std::endl;
+    player.boirePotionDeVie(50);
     return true;
 }
 else{
@@ -320,13 +333,13 @@ std::string Perso::getmotcrypte(){
 void Perso::loot(Perso &player){
     if(pointeur_arme->nom()!="Mains"){
         player.ajoutinventaire2(pointeur_arme);
-        std::cout<<"Tu as récupéré le stuff de l'ennemi"<<std::endl;
+        std::cout<<"Tu as récupéré sur l'ennemi: "<<pointeur_arme->nom()<<std::endl;
     }
     int i=0;
     for(std::shared_ptr<Arme> x: inventaire){
         
         player.ajoutinventaire2(x);
-        std::cout<<"Tu as récupéré le stuff de l'ennemi"<<std::endl;
+        std::cout<<"Tu as récupéré sur l'ennemi: "<<x->nom()<<std::endl;
         i=1;
 
     }
@@ -337,6 +350,11 @@ void Perso::loot(Perso &player){
 /*Systeme de révélation d'une lettre du mot caché*/
 
 void Perso::reveal(){
+
+    if (indice==mot.size()){
+        std::cout<<"Tu as déjà tout découvert"<<std::endl;
+        return;
+    }
 
     int m=nombrealea(1,mot.size()-indice);
     int k=0;
@@ -351,6 +369,7 @@ void Perso::reveal(){
             break;
 
         }
+    indice = indice+1;
 
 
 
@@ -363,6 +382,48 @@ void Perso::reveal(){
 
 std::string Perso::getmot(){
     return mot;
+}
+
+std::shared_ptr<Perso> creationperso(std::string numero,int i){
+    if(numero=="1"){
+        return std::make_shared<Mage>();
+    }
+    if(numero=="2"){
+        return std::make_shared<Guerrier>();
+    }
+    if(numero=="3"){
+        return std::make_shared<Voleur>();
+    }
+    else{
+        if(i==0){
+        std::cout<<"Tu n'as pas choisi de classe, tu es donc un guerrier"<<std::endl;
+        return std::make_shared<Guerrier>();
+        }
+    }
+}
+
+void Perso::stuff(){
+    std::cout<<"Voici l'arme que tu as en main : "<<std::endl;
+    std::cout<<ptr_arme()->nom()<<" de durabilite:"<<ptr_arme()->dura()<<std::endl;
+
+    std::cout<<""<<std::endl;
+
+    std::cout<<"Et voici le stuff dans ton inventaire :"<<std::endl;
+    voirinventaire();
+}
+
+void Perso::changement(){
+            std::string ent="";
+            std::cout<<"Veux tu changer d'arme ? oui (0) ou non (1)"<<std::endl;
+            int j;
+            std::cin>>ent;
+
+            if(ent=="0"){
+                std::cout<<"Quel arme veux-tu ?"<<std::endl;
+                std::cin>>j;
+                changerarme(j);
+
+            }
 }
 
 

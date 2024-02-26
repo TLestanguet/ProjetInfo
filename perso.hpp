@@ -41,7 +41,6 @@ class Perso
     bool estVivant();
     int pointdevie();
     void changerdetape();
-    int mana();
     std::shared_ptr<Arme> ptr_arme();
     void ajoutinventaire(std::string nomNouvelleArme);
     void changerarme(int i);
@@ -53,9 +52,13 @@ class Perso
     void ajoutinventaire2(std::shared_ptr<Arme> ptra);
     std::string getmotcrypte();
     std::string getmot();
+    void stuff();
+    std::string nom();
+    void changement();
 
     protected:
 
+    std::string m_nom;
     int indice; /*Nombre d'indice sur le mot caché reçu */
     std::string mot;
     std::string motcrypte;
@@ -115,6 +118,10 @@ public:
 int combat(Perso &player, Perso &ennemi);
 
 int nombrealea(int i,int j);
+
+std::shared_ptr<Perso> creationperso(std::string numero,int i);
+
+
 
 
 

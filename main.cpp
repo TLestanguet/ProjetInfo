@@ -44,15 +44,7 @@ std::cin >> classeChoisie;
 
 std::shared_ptr<Perso> joueur; /*Utilisation d'un pointeur de classe pour l'utiliser comme pointeur vers une sous classe*/
 
-    if (classeChoisie == "1") {
-        joueur = std::make_shared<Mage>();
-    } 
-    else if (classeChoisie == "3") {
-        joueur = std::make_shared<Voleur>();
-    } 
-    else if (classeChoisie == "2") {
-        joueur = std::make_shared<Guerrier>();
-    }
+joueur=creationperso(classeChoisie,0);
 
 auto player = *joueur;
 
@@ -64,27 +56,22 @@ player.ajoutinventaire("Epeeenbois");
 }
 
 
-std::cout<<"Voici l'arme que tu as en main : "<<std::endl;
-std::cout<<player.ptr_arme()->nom()<<" de durabilite:"<<player.ptr_arme()->dura()<<std::endl;
-
-std::cout<<""<<std::endl;
-
-std::cout<<"Et voici le stuff dans ton inventaire :"<<std::endl;
-player.voirinventaire();
-
+player.stuff();
+player.changement();
 std::cout<<""<<std::endl;
 
 /*On crée un vecteur d'ennemi*/
-std::vector<std::shared_ptr<Perso>> Ennemis = {std::make_shared<Voleur>(),std::make_shared<Mage>(),std::make_shared<Guerrier>(),std::make_shared<Guerrier>(),std::make_shared<Guerrier>()};
+std::shared_ptr<Perso> Ennemi = std::make_shared<Voleur>();
+Ennemi->ajoutinventaire("Epeeenfer");
 
 /*On leur donne un stuff minimal et on les equipe si besoin*/
 
-for(auto x: Ennemis){
+/*for(auto x: Ennemis){
     x->ajoutinventaire("Epeeenbois");
     if (x->ptr_arme()->nom()=="Mains"){
         x->changerarme(0);
     }
-}
+}*/
 
 std::cout<<"Te voilà armé pour ton 1er combat"<<std::endl;
 
@@ -95,28 +82,18 @@ std::cout<<"Te voilà armé pour ton 1er combat"<<std::endl;
     int j;
     while(true){
         
-         for(std::shared_ptr<Perso> x: Ennemis){
+         while(true){
+
+            std::cout<<"Te voila arrivé sur place il semble que ce soit un "<<Ennemi->nom()<<" armé de "<<Ennemi->ptr_arme()->nom()<<std::endl;
+
         
-            combat(player, *x);
+            if(combat(player, *Ennemi)==false){
+                std::cout<<"Tu as perdu le combat et tu rejoins l'au delà"<<std::endl;
+                return 0;}
 
-            std::cout<<"Voici l'arme que tu as en main : "<<std::endl;
-            
-            std::cout<<player.ptr_arme()->nom()<<" de durabilite:"<<player.ptr_arme()->dura()<<std::endl;
-            
-            std::cout<<"Et voici le stuff dans ton inventaire :"<<std::endl;
+            player.stuff();
 
-            player.voirinventaire();
-
-            std::cout<<"Veux tu changer d'arme ? oui (0) ou non (1)"<<std::endl;
-
-            std::cin>>ent;
-
-            if(ent=="0"){
-                std::cout<<"Quel arme veux-tu ?"<<std::endl;
-                std::cin>>j;
-                player.changerarme(j);
-
-            }
+            player.changement();
 
             std::cout<<player.getmotcrypte()<<std::endl;
 
@@ -139,12 +116,19 @@ std::cout<<"Te voilà armé pour ton 1er combat"<<std::endl;
                 }
             }
 
+            std::cout<<"Ton fidèle ragondin vient de te degoter un nouvel ennemi"<<std::endl;
+
+            Ennemi = creationperso(std::to_string(nombrealea(1,3)),1);
+            Ennemi->ajoutinventaire("Epeeenbois");
+            if (Ennemi->ptr_arme()->nom()=="Mains"){
+                Ennemi->changerarme(0);
+
 
 
             }
         
         
-        break;
+        
         
 
         
@@ -154,5 +138,6 @@ std::cout<<"Te voilà armé pour ton 1er combat"<<std::endl;
     }
 
     return 0;
+}
 }
 
